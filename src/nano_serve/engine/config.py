@@ -1,0 +1,60 @@
+"""Configuration dataclasses.
+
+The first implementation keeps configuration in simple dataclasses so every
+feature is explicit and easy to serialize into benchmark artifacts.
+"""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from typing import Literal
+
+
+SchedulerKind = Literal["single", "static_batch", "continuous", "chunked_prefill"]
+KVCacheKind = Literal["none", "contiguous", "paged", "paged_prefix", "offload"]
+AttentionBackendKind = Literal[
+    "torch_naive",
+    "torch_sdpa",
+    "torch_gather_paged",
+    "tile_paged",
+]
+SamplerKind = Literal["greedy", "topk_topp", "beam"]
+SpecDecodeKind = Literal["none", "draft_model", "ngram", "medusa", "eagle"]
+GraphKind = Literal["none", "torch_compile", "cuda_graph"]
+ParallelMode = Literal["none", "dp", "tp", "pp", "ep", "pd", "af"]
+
+
+@dataclass(frozen=True)
+class ParallelConfig:
+    mode: ParallelMode = "none"
+    tp_size: int = 1
+    pp_size: int = 1
+    dp_size: int = 1
+    ep_size: int = 1
+
+
+@dataclass(frozen=True)
+class BenchmarkConfig:
+    enable_nvtx: bool = True
+    enable_ncu: bool = False
+    log_iteration_trace: bool = True
+
+
+@dataclass(frozen=True)
+class EngineConfig:
+    scheduler: SchedulerKind = "single"
+    kv_cache: KVCacheKind = "none"
+    attention_backend: AttentionBackendKind = "torch_naive"
+    sampler: SamplerKind = "greedy"
+    spec_decode: SpecDecodeKind = "none"
+    graph: GraphKind = "none"
+    max_num_seqs: int = 1
+    max_num_batched_tokens: int = 4096
+    max_prefill_chunk_tokens: int = 1024
+    block_size: int = 16
+    parallel: ParallelConfig = field(default_factory=ParallelConfig)
+    benchmark: BenchmarkConfig = field(default_factory=BenchmarkConfig)
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+

@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nano-serve"
+version = "0.0.0"
+description = "A benchmark-first learning-oriented LLM serving engine."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "nano-serve contributors" }]
+dependencies = [
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+torch = [
+  "torch",
+  "safetensors",
+  "transformers",
+]
+server = [
+  "fastapi",
+  "uvicorn",
+]
+benchmark = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+]
+tilelang = [
+  "tilelang",
+]
+dev = [
+  "pytest",
+  "ruff",
+  "mypy",
+]
+
+[project.scripts]
+nano-serve = "nano_serve.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["nano_serve"]
+
